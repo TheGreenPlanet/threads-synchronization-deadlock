@@ -174,7 +174,8 @@ inc_atomic(void *arg __attribute__((unused)))
     {
         /* TODO: Use atomic addition to increment the shared counter */
 
-        counter += INCREMENT; // You need to replace this.
+        __sync_fetch_and_add(&counter, INCREMENT);
+        // counter += INCREMENT; // You need to replace this.
     }
 
     return NULL;
@@ -190,7 +191,8 @@ dec_atomic(void *arg __attribute__((unused)))
     {
         /* TODO: Use atomic subtraction to increment the shared counter */
 
-        counter -= DECREMENT; // You need to replace this.
+        __sync_fetch_and_sub(&counter, INCREMENT);
+        // counter -= DECREMENT; // You need to replace this.
     }
 
     return NULL;
