@@ -114,11 +114,16 @@ dec_mutex(void *arg __attribute__((unused)))
 void spin_lock()
 {
     /* TODO: Implement the lock operation for a test-and-set spinlock. */
+    while (__sync_lock_test_and_set(&lock, true))
+    {
+        
+    }
 }
 
 void spin_unlock()
 {
     /* TODO: Implement the unlock operation for a test-and-set spinlock. */
+    __sync_lock_release(&lock);
 }
 
 /* Increments of the shared counter should be protected by a test-and-set spinlock */
@@ -130,7 +135,9 @@ inc_tas_spinlock(void *arg __attribute__((unused)))
     for (i = 0; i < INC_ITERATIONS; i++)
     {
         /* TODO: Add the spin_lock() and spin_unlock() operations inside the loop. */
+        spin_lock();
         counter += INCREMENT;
+        spin_unlock();
     }
 
     return NULL;
@@ -145,7 +152,9 @@ dec_tas_spinlock(void *arg __attribute__((unused)))
     for (i = 0; i < DEC_ITERATIONS; i++)
     {
         /* TODO: Add the spin_lock() and spin_unlock() operations inside the loop. */
+        spin_lock();
         counter -= DECREMENT;
+        spin_unlock();
     }
 
     return NULL;
