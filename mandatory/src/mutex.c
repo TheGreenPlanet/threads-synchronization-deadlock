@@ -10,12 +10,12 @@
  * 2019 - Refactor and added stats summary by Karl Marklund <karl.marklund@it.uu.se>.
  */
 
-#include <stdio.h>     // printf(), fprintf()
-#include <stdlib.h>    // abort()
-#include <pthread.h>   // pthread_...
-#include <stdbool.h>   // true, false
+#include <stdio.h>   // printf(), fprintf()
+#include <stdlib.h>  // abort()
+#include <pthread.h> // pthread_...
+#include <stdbool.h> // true, false
 
-#include "timing.h"    // timing_start(), timing_stop()
+#include "timing.h" // timing_start(), timing_stop()
 
 /* Shared variable */
 volatile int counter;
@@ -49,7 +49,8 @@ inc_no_sync(void *arg __attribute__((unused)))
 {
     int i;
 
-    for (i = 0; i < INC_ITERATIONS; i++) {
+    for (i = 0; i < INC_ITERATIONS; i++)
+    {
         counter += INCREMENT;
     }
 
@@ -62,7 +63,8 @@ dec_no_sync(void *arg __attribute__((unused)))
 {
     int i;
 
-    for (i = 0; i < DEC_ITERATIONS; i++) {
+    for (i = 0; i < DEC_ITERATIONS; i++)
+    {
         counter -= DECREMENT;
     }
 
@@ -79,10 +81,11 @@ inc_mutex(void *arg __attribute__((unused)))
 {
     int i;
 
-    for (i = 0; i < INC_ITERATIONS; i++) {
-        /* TODO: Protect access to the shared variable counter with a mutex lock
-         * inside the loop. */
+    for (i = 0; i < INC_ITERATIONS; i++)
+    {
+        pthread_mutex_lock(&mutex);
         counter += INCREMENT;
+        pthread_mutex_unlock(&mutex);
     }
 
     return NULL;
@@ -94,25 +97,27 @@ dec_mutex(void *arg __attribute__((unused)))
 {
     int i;
 
-    for (i = 0; i < DEC_ITERATIONS; i++) {
-        /* TODO: Protect access to the shared variable counter with a mutex lock
-         * inside the loop. */
+    for (i = 0; i < DEC_ITERATIONS; i++)
+    {
+        pthread_mutex_lock(&mutex);
         counter -= DECREMENT;
+        pthread_mutex_unlock(&mutex);
     }
 
     return NULL;
 }
 
-
 /*******************************************************************************
                       Test 2 - Spinlock with test-and-set
 *******************************************************************************/
 
-void spin_lock() {
+void spin_lock()
+{
     /* TODO: Implement the lock operation for a test-and-set spinlock. */
 }
 
-void spin_unlock() {
+void spin_unlock()
+{
     /* TODO: Implement the unlock operation for a test-and-set spinlock. */
 }
 
@@ -122,7 +127,8 @@ inc_tas_spinlock(void *arg __attribute__((unused)))
 {
     int i;
 
-    for (i = 0; i < INC_ITERATIONS; i++) {
+    for (i = 0; i < INC_ITERATIONS; i++)
+    {
         /* TODO: Add the spin_lock() and spin_unlock() operations inside the loop. */
         counter += INCREMENT;
     }
@@ -136,14 +142,14 @@ dec_tas_spinlock(void *arg __attribute__((unused)))
 {
     int i;
 
-    for (i = 0; i < DEC_ITERATIONS; i++) {
+    for (i = 0; i < DEC_ITERATIONS; i++)
+    {
         /* TODO: Add the spin_lock() and spin_unlock() operations inside the loop. */
         counter -= DECREMENT;
     }
 
     return NULL;
 }
-
 
 /*******************************************************************************
                       Tes 3 - Atomic addition/subtraction
@@ -155,7 +161,8 @@ inc_atomic(void *arg __attribute__((unused)))
 {
     int i;
 
-    for (i = 0; i < INC_ITERATIONS; i++) {
+    for (i = 0; i < INC_ITERATIONS; i++)
+    {
         /* TODO: Use atomic addition to increment the shared counter */
 
         counter += INCREMENT; // You need to replace this.
@@ -170,7 +177,8 @@ dec_atomic(void *arg __attribute__((unused)))
 {
     int i;
 
-    for (i = 0; i < DEC_ITERATIONS; i++) {
+    for (i = 0; i < DEC_ITERATIONS; i++)
+    {
         /* TODO: Use atomic subtraction to increment the shared counter */
 
         counter -= DECREMENT; // You need to replace this.
@@ -187,33 +195,37 @@ dec_atomic(void *arg __attribute__((unused)))
 
 /* Each test case is represented by the following struct. */
 
-typedef struct {
-    char *name;            // Test case name.
-    void * (*inc)(void *); // Increment function.
-    void * (*dec)(void *); // Decrement function.
-    double total_time;     // Total runtime;
-    double average_time;   // Average execution time per thread.
-    int counter;           // Final value of the shared counter.
+typedef struct
+{
+    char *name;           // Test case name.
+    void *(*inc)(void *); // Increment function.
+    void *(*dec)(void *); // Decrement function.
+    double total_time;    // Total runtime;
+    double average_time;  // Average execution time per thread.
+    int counter;          // Final value of the shared counter.
 } test_t;
 
 test_t tests[] = {
-    { .inc = inc_no_sync,      .dec = dec_no_sync,      .name = "No synchronization"},
-    { .inc = inc_mutex,        .dec = dec_mutex,        .name = "Pthread mutex"},
-    { .inc = inc_tas_spinlock, .dec = dec_tas_spinlock, .name = "Spinlock"},
-    { .inc = inc_atomic,       .dec = dec_atomic,       .name = "Atomic add/sub"},
-    { .inc = NULL,             .dec = NULL,             .name = NULL}
-};
-
+    {.inc = inc_no_sync, .dec = dec_no_sync, .name = "No synchronization"},
+    {.inc = inc_mutex, .dec = dec_mutex, .name = "Pthread mutex"},
+    {.inc = inc_tas_spinlock, .dec = dec_tas_spinlock, .name = "Spinlock"},
+    {.inc = inc_atomic, .dec = dec_atomic, .name = "Atomic add/sub"},
+    {.inc = NULL, .dec = NULL, .name = NULL}};
 
 // Information about each thread will be kept in the following struct.
 
-typedef struct {
+typedef struct
+{
     // Pthread ID (tid) of the created thread will be stored here after calling pthread_create().
     pthread_t tid;
     // Numeric thread ID.
     int id;
     // Type of thread (increment or decrement).
-    enum type {inc, dec} type;
+    enum type
+    {
+        inc,
+        dec
+    } type;
     // The created thread will start to execute in the start_routine function ...
     void *(*start_routine)(void *);
     // ... with arg as its sole argument.
@@ -222,11 +234,16 @@ typedef struct {
     double run_time;
 } thread_t;
 
-char * type2string(enum type type) {
-    switch (type) {
-    case inc: return "inc";
-    case dec: return  "dec";
-    default: return "???";
+char *type2string(enum type type)
+{
+    switch (type)
+    {
+    case inc:
+        return "inc";
+    case dec:
+        return "dec";
+    default:
+        return "???";
     }
 }
 
@@ -246,8 +263,6 @@ generic_thread(void *_conf)
     pthread_exit(0);
 }
 
-
-
 double
 print_stats(thread_t *threads, int nthreads, int niterations, test_t *test)
 {
@@ -255,7 +270,8 @@ print_stats(thread_t *threads, int nthreads, int niterations, test_t *test)
     double average_execution_time = 0;
 
     printf("\nStatistics:\n\n");
-    for (int i = 0; i < nthreads; i++) {
+    for (int i = 0; i < nthreads; i++)
+    {
         thread_t *t = &threads[i];
         printf("Thread %i (%s): %.4f sec (%.4e iterations/s)\n",
                i, type2string(t->type), t->run_time,
@@ -263,7 +279,7 @@ print_stats(thread_t *threads, int nthreads, int niterations, test_t *test)
         run_time_sum += t->run_time;
     }
 
-    average_execution_time = run_time_sum /nthreads;
+    average_execution_time = run_time_sum / nthreads;
 
     printf("\nAverage execution time: %.4f s/thread\n"
            "\nAvergage iterations/second: %.4e iterations/s\n",
@@ -274,10 +290,12 @@ print_stats(thread_t *threads, int nthreads, int niterations, test_t *test)
     return average_execution_time;
 }
 
-char *successOrFailure(int counter) {
+char *successOrFailure(int counter)
+{
     return (counter == 0) ? "success" : "failure";
 }
-void print_stats_summary(test_t tests[]) {
+void print_stats_summary(test_t tests[])
+{
     test_t *test = tests;
     int width = 20;
 
@@ -288,7 +306,8 @@ void print_stats_summary(test_t tests[]) {
     printf("%*s     Counter     Result      time (sec)     per thread (sec/thread)\n", width, "Test Case");
     printf("-----------------------------------------------------------------------------------------\n");
 
-    while (test->inc && test->dec) {
+    while (test->inc && test->dec)
+    {
         printf("%*s     %-10d  %s     %f       %f\n",
                width,
                test->name,
@@ -300,7 +319,8 @@ void print_stats_summary(test_t tests[]) {
     }
 }
 
-void run_test(test_t *test) {
+void run_test(test_t *test)
+{
     int i, nthreads = 0;
     thread_t threads[INC_THREADS + DEC_THREADS];
     double average_execution_time = 0;
@@ -313,12 +333,14 @@ void run_test(test_t *test) {
 
     /* Create the incrementing threads */
 
-    for (i = 0; i < INC_THREADS; i++) {
+    for (i = 0; i < INC_THREADS; i++)
+    {
         thread_t *thread = &threads[nthreads];
         thread->id = nthreads;
         thread->type = inc;
         thread->start_routine = test->inc;
-        if (pthread_create(&thread->tid, NULL, generic_thread, thread) != 0) {
+        if (pthread_create(&thread->tid, NULL, generic_thread, thread) != 0)
+        {
             perror("pthread_create");
             abort();
         }
@@ -327,12 +349,14 @@ void run_test(test_t *test) {
 
     /* Create the decrementing threads */
 
-    for (i = 0; i < DEC_THREADS; i++) {
+    for (i = 0; i < DEC_THREADS; i++)
+    {
         thread_t *thread = &threads[nthreads];
         thread->id = nthreads;
         thread->type = dec;
         thread->start_routine = test->dec;
-        if (pthread_create(&thread->tid, NULL, generic_thread, thread) != 0) {
+        if (pthread_create(&thread->tid, NULL, generic_thread, thread) != 0)
+        {
             perror("pthread_create");
             abort();
         }
@@ -342,7 +366,8 @@ void run_test(test_t *test) {
     /* Wait for all threads to terminate */
 
     for (i = 0; i < nthreads; i++)
-        if (pthread_join(threads[i].tid, NULL) != 0) {
+        if (pthread_join(threads[i].tid, NULL) != 0)
+        {
             perror("pthread_join");
             abort();
         }
@@ -351,25 +376,27 @@ void run_test(test_t *test) {
     printf("Counter expected value:%10d\n", 0);
     printf("Counter actual value:  %10d\n", counter);
 
-    test -> counter = counter;
+    test->counter = counter;
 
-    if (counter != 0) {
+    if (counter != 0)
+    {
         printf("\nFAILURE :-(\n");
-    } else {
+    }
+    else
+    {
         printf("\nSUCCES :-)\n");
     }
 
     average_execution_time = print_stats(threads, nthreads, INC_ITERATIONS + DEC_ITERATIONS, test);
-    test -> average_time = average_execution_time;
-
+    test->average_time = average_execution_time;
 }
 
-int
-main()
+int main()
 {
     test_t *test = tests;
 
-    while (test->inc && test->dec) {
+    while (test->inc && test->dec)
+    {
         run_test(test);
         test++;
     }
